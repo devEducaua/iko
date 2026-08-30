@@ -1,10 +1,6 @@
 package main
 
-import (
-	"os"
-	"os/exec"
-	"path/filepath"
-)
+import "ui/internal/lang"
 
 type Pkg struct {
 	Name string
@@ -19,18 +15,21 @@ type Repo struct {
 }
 
 func main() {
-	repos := []Repo{
-		Repo{
-			Name: "nvim",
-			Url: "https://github.com/neovim/neovim",
-		},
-		Repo{
-			Name: "github",
-			Url: "https://github.com",
-			Base: true,
-		},
+	// repos := []Repo{
+	// 	Repo{
+	// 		Name: "nvim",
+	// 		Url: "https://github.com/neovim/neovim",
+	// 	},
+	// 	Repo{
+	// 		Name: "github",
+	// 		Url: "https://github.com",
+	// 		Base: true,
+	// 	},
+	// }
+
+	err :=  lang.Parse("syntax.ui");
+	if err != nil {
+		panic(err);
 	}
-
-
 }
 
