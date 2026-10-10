@@ -1,7 +1,7 @@
 
-TARGET = ui
+TARGET = iko
 TARGETDIR = build
-SRCS = $(fd -e .go)
+SRCS = $(shell fd -e .go)
 
 all: $(TARGETDIR)/$(TARGET)
 
@@ -11,7 +11,7 @@ run:
 	./$(TARGETDIR)/$(TARGET)
 
 $(TARGETDIR)/$(TARGET): $(SRCS)
-	go build -o $@ cmd/main.go
+	go build -o $@ .
 
 clean:
 	rm -r $(TARGETDIR)

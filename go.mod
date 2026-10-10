@@ -1,3 +1,3 @@
-module ui
+module iko
 
 go 1.26.6

@@ -1,6 +1,10 @@
 package main
 
-import "ui/internal/lang"
+import (
+	"fmt"
+	"iko/internal/ui"
+	"os"
+)
 
 type Pkg struct {
 	Name string
@@ -27,9 +31,15 @@ func main() {
 	// 	},
 	// }
 
-	err :=  lang.Parse("syntax.ui");
+	dat, err := os.ReadFile("syntax.ui");
 	if err != nil {
 		panic(err);
 	}
+
+	p, err := ui.Parse(string(dat));
+	if err != nil {
+		panic(err);
+	}
+	fmt.Println(p.Entries);
 }
 

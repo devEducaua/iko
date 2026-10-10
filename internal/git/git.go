@@ -51,7 +51,7 @@ func getOutPath(name string) (string, error) {
 		xdg = filepath.Join(home, ".config");
 	}
 
-	uyDir := filepath.Join(xdg, "ui");
+	ikoDir := filepath.Join(xdg, "iko");
 	if err := os.MkdirAll(uyDir, 0755); err != nil {
 		return "", err;
 	}

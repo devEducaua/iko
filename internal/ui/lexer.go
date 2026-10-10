@@ -1,8 +1,6 @@
-package lang
+package ui
 
 import (
-	"fmt"
-	"os"
 	"strings"
 	"unicode"
 )
@@ -14,7 +12,7 @@ const (
 	TokenBraceClose
 	TokenBracketOpen
 	TokenBracketClose
-	TokenEquals
+	TokenAssign
 	TokenDot
 	TokenComma
 	TokenTrue
@@ -39,33 +37,7 @@ type Lexer struct {
 	Pos int
 }
 
-
-func Parse(path string) error {
-	dat, err := os.ReadFile(path);
-	if err != nil {
-		return err;
-	}
-
-	l := Lexer{
-		Content: string(dat),
-		Pos: 0,
-		Col: 0,
-		Line: 1,
-	};
-
-	for {
-		tok := l.NextToken();
-
-		if tok.Kind == TokenEof {
-			break;	
-		}
-		fmt.Println(tok);
-	}
-	return nil;
-}
-
 func (l *Lexer) NextToken() Token {
-
 	l.SkipWhitespace();
 
 	var t Token;
@@ -85,7 +57,7 @@ func (l *Lexer) NextToken() Token {
 	case ']':
 		t.Kind = TokenBracketClose;
 	case '=':
-		t.Kind = TokenEquals;
+		t.Kind = TokenAssign;
 	case ',':
 		t.Kind = TokenComma;
 	case '.':
@@ -136,7 +108,6 @@ func (l *Lexer) IsValidIdent(c byte) bool {
 }
 
 func (l *Lexer) Ident(begin byte) Token {
-	
 	var ident strings.Builder;
 	ident.WriteByte(begin);
 	for {
