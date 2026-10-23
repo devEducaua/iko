@@ -1,0 +1,60 @@
+package lua
+
+import (
+	"fmt"
+
+	"github.com/yuin/gopher-lua"
+	"github.com/yuin/gluamapper"
+)
+
+func ReadFile() error { 
+	l := lua.NewState();
+	defer l.Close();
+	err := l.DoFile("tests/init.lua");
+	if err != nil {
+		return err;
+	}
+
+	repositories := l.GetGlobal("repositories");
+
+	table, ok := repositories.(*lua.LTable);
+	if !ok {
+		return fmt.Errorf("`repositories` needs to be a lua table");
+	}
+
+	var repo Repository;
+	if err := gluamapper.Map(table, &repo); err != nil {
+		return err;
+	}
+
+	return nil;
+}
+
+func tableToRepositories(l *lua.LState) ([]Repository, error) {
+	repositories := l.GetGlobal("repositories");
+
+	table, ok := repositories.(*lua.LTable);
+	if !ok {
+		return nil, fmt.Errorf("`repositories` need to be a table")
+	}
+
+	var repos []Repository;
+	table.ForEach(func(key, value lua.LValue) {
+		var repo Repository;
+
+		repo.Name = lua.LVAsString(key);		
+		table.ForEach(func(key, value lua.LValue) {
+			switch key.String() {
+			case "url":
+				repo.Url = lua.LVAsString(key)
+			case "build":
+			default:
+				// TODO: handle error
+			}
+		})
+		repos = append(repos, repo);
+	})
+
+
+	return repos, nil;
+}

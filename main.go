@@ -2,44 +2,30 @@ package main
 
 import (
 	"fmt"
-	"iko/internal/ui"
+	"iko/internal/config"
 	"os"
 )
 
-type Pkg struct {
-	Name string
-	Repo string
-	Url string
-}
-
-type Repo struct {
-	Name string
-	Url string
-	Base bool
-}
-
 func main() {
-	// repos := []Repo{
-	// 	Repo{
-	// 		Name: "nvim",
-	// 		Url: "https://github.com/neovim/neovim",
-	// 	},
-	// 	Repo{
-	// 		Name: "github",
-	// 		Url: "https://github.com",
-	// 		Base: true,
-	// 	},
-	// }
-
-	dat, err := os.ReadFile("syntax.ui");
+	pkgs, err := config.ReadPackages();
 	if err != nil {
 		panic(err);
 	}
-
-	p, err := ui.Parse(string(dat));
-	if err != nil {
-		panic(err);
+	for i,p := range pkgs {
+		fmt.Printf("[%v] %v\n", i, p);
 	}
-	fmt.Println(p.Entries);
 }
 
+func DetectBuildSystem(buildMarkers map[string]string, path string) (string, error) {
+	entries, err := os.ReadDir(path);
+	if err != nil {
+		return "", err;
+	}
+
+	for _,e := range entries {
+		if sys, ok := buildMarkers[e.Name()]; ok {
+			return sys, nil;
+		}
+	}
+	return "", nil;
+}
