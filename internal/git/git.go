@@ -17,7 +17,7 @@ func ClonePkg(name, url, configPath string) (bool, error) {
 		}
 		return false, err;
 	}
-	fmt.Printf("[GIT]: cloning %v into %v from %v: %v\n", name, path, url, out);
+	fmt.Printf("[GIT]: cloning `%v` from %v: %v\n", name, url, out);
 	return false, nil;
 }
 
