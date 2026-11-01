@@ -10,7 +10,7 @@ import (
 // returned bool means alreadyClonned
 func ClonePkg(name, url, configPath string) (bool, error) {
 	path := filepath.Join(configPath, name);
-	out, err := gitCommand("", "clone", url, path); 
+	out, err := gitCommand("", "clone", url, path);
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "exit status 128") {
 			return true, nil;
@@ -31,25 +31,16 @@ func gitCommand(dir string, command ...string) (string, error) {
 	return string(bt), nil;
 }
 
-func gitPull(name string) (bool, error) {
-	// TODO: to implement
-	return false, nil;
-}
-
-func getConfigPath() (string, error) {
-	xdg := os.Getenv("XDG_CONFIG_HOME");
-	if xdg == "" {
-		home, err := os.UserConfigDir();
-		if err != nil {
-			return "", err;
-		}
-		xdg = filepath.Join(home, ".config");
+func Pull(name, path string) (bool, error) {
+	// TODO: branch and commits options later
+	out, err := gitCommand(path, "pull");
+	if err != nil {
+		return false, err;
 	}
-
-	ikoDir := filepath.Join(xdg, "iko");
-	if err := os.MkdirAll(ikoDir, 0755); err != nil {
-		return "", err;
+	if strings.HasPrefix(out, "Already up to date.") {
+		return false, nil;
 	}
-	return ikoDir, nil;
+	fmt.Printf("[PULL]: %v\n", name);
+	return true, nil;
 }
 
