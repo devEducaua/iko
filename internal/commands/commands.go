@@ -55,7 +55,13 @@ func Update(includeArgs, excludeArgs string) error {
 	}
 	defer l.Close();
 
-	for _,p := range pkgMap {
+	inc, ex := config.GetOnlyExcludeArgs(includeArgs, excludeArgs);
+	filt, err := pkgs.FilterPkgs(pkgMap, inc, ex);
+	if err != nil {
+		return err;
+	}
+
+	for _,p := range filt {
 		updated, err := git.Pull(p.Name, p.Path);
 		if err != nil {
 			// TOOD: should not break in the middle of the loop, just log
