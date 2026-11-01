@@ -1,7 +1,9 @@
 
 # iko
 
-simple git/source-based package manager.
+simple git/ports/source based package manager.
+
+[WARNING]: this project is in development and is expected to have a lot of break changes.
 
 # build
 
