@@ -24,6 +24,7 @@ func parseArgs(argv []string) error {
 		removeF bool;
 		syncF bool;
 		updateF bool;
+		listF bool;
 		onlyF string;
 		excludeF string;
 	)
@@ -31,6 +32,7 @@ func parseArgs(argv []string) error {
 	f.Var("remove", "r", &removeF);
 	f.Var("update", "u", &updateF);
 	f.Var("sync", "s", &syncF);
+	f.Var("list", "l", &listF);
 	f.Var("only", "o", &onlyF);
 	f.Var("exclude", "x", &excludeF);
 	f.Var("help", "h", &helpF);
@@ -61,6 +63,11 @@ func parseArgs(argv []string) error {
 		}
 	case syncF:
 		err := commands.Sync(onlyF, excludeF);
+		if err != nil {
+			return err;
+		}
+	case listF:
+		err := commands.List();
 		if err != nil {
 			return err;
 		}

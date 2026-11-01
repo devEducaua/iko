@@ -102,3 +102,18 @@ func Install(includeArgs, excludeArgs string) error {
 	return nil;
 }
 
+func List() error {
+	m, l, err := pkgs.GetPkgs();
+	if err != nil {
+		return err;
+	}
+	defer l.Close();
+
+	for _,p := range m {
+		fmt.Printf("%v\n", p.Name);
+	}
+
+	return nil;
+}
+
+
