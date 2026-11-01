@@ -19,6 +19,28 @@ type Pkg struct {
 	Path string
 }
 
+func GetFilteredPkgs(only, exclude string) (map[string]Pkg, *lua.LState, error) {
+	m, l, err := GetPkgs();
+	if err != nil {
+		return nil, nil, err;
+	}
+	on, ex := config.GetOnlyExcludeArgs(only, exclude);
+	filtered, err := FilterPkgs(m, on, ex);
+	if err != nil {
+		return nil, nil, err;
+	}
+	return filtered, l, nil;
+}
+
+// func GetRepos(l *lua.LState) (map[string]string, error) {
+// 	r, err := config.ReadRepositories(l);
+// 	if err != nil {
+// 		return nil, err;
+// 	}
+//
+// 	return nil, nil;
+// }
+
 func GetPkgs() (map[string]Pkg, *lua.LState, error) {
 	l, err := config.GetState();
 	if err != nil {
