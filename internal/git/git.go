@@ -1,26 +1,29 @@
 package git
 
 import (
-	"os"
+	"fmt"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
-func ClonePkg(url, name string) (string, error) {
-	configPath, err := getConfigPath();
-	if err != nil {
-		return "", err;
-	}
+// returned bool means alreadyClonned
+func ClonePkg(name, url, configPath string) (bool, error) {
 	path := filepath.Join(configPath, name);
-	if _, err := gitCommand("clone", url, path); err != nil {
-		return "", err;
+	out, err := gitCommand("", "clone", url, path); 
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "exit status 128") {
+			return true, nil;
+		}
+		return false, err;
 	}
-	return path, nil;
+	fmt.Printf("[GIT]: cloning %v into %v from %v: %v\n", name, path, url, out);
+	return false, nil;
 }
 
-func gitCommand(command ...string) (string, error) {
+func gitCommand(dir string, command ...string) (string, error) {
 	cmd := exec.Command("git", command...);
-
+	cmd.Dir = dir;
 	bt, err := cmd.CombinedOutput();
 	if err != nil {
 		return "", err;
