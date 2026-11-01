@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"iko/internal/commands"
 	"iko/internal/flags"
@@ -41,7 +40,7 @@ func parseArgs(argv []string) error {
 		return err;
 	}
 	if len(argv) < 1 {
-		// f.ShowHelp();
+		// TODO: f.ShowHelp();
 		return nil;
 	}
 
@@ -72,23 +71,10 @@ func parseArgs(argv []string) error {
 			return err;
 		}
 	case helpF:
-		// f.ShowHelp()
+		// TODO: f.ShowHelp()
 	default:
-		// f.ShowHelp()
+		// TODO: f.ShowHelp()
 	}
 	return nil;
 }
 
-func DetectBuildSystem(buildMarkers map[string]string, path string) (string, error) {
-	entries, err := os.ReadDir(path);
-	if err != nil {
-		return "", err;
-	}
-
-	for _,e := range entries {
-		if sys, ok := buildMarkers[e.Name()]; ok {
-			return sys, nil;
-		}
-	}
-	return "", errors.New("could not find build system");
-}

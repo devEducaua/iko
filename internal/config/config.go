@@ -51,6 +51,20 @@ func GetState() (*lua.LState, error) {
 	return l, nil;
 }
 
+func CollectBuildSystemMarkers(l *lua.LState, systems map[string]System) (map[string]string, error) {
+	m := make(map[string]string);
+	systems, err := ReadSystems(l);
+	if err != nil {
+		return nil, err;
+	}
+	for _,s := range systems {
+		for _,marker := range s.RootMarkers {
+			m[marker] = s.Name;
+		}
+	}
+	return m, nil;
+}
+
 func ReadRepositories(l *lua.LState) (map[string]Repository, error) {
 	repos := make(map[string]Repository);
 
@@ -76,15 +90,13 @@ func ReadRepositories(l *lua.LState) (map[string]Repository, error) {
 		repo.Url = l.GetField(vt, "url").String();
 
 		st, ok := l.GetField(vt, "system").(*lua.LTable);
-		if !ok {
-			// TODO: handle error
-			return;
+		if ok {
+			repo.System.Name = l.GetField(st, "name").String();
 		}
-		repo.System.Name = l.GetField(st, "name").String();
 		// TODO: transform into []string instead of string
-		repo.System.BuildArgs = l.GetField(st, "build_args").String();
-		repo.System.InstallArgs = l.GetField(st, "install_args").String();
-		repo.System.UninstallArgs = l.GetField(st, "uninstall_args").String();
+		// repo.System.BuildArgs = l.GetField(st, "build_args").String();
+		// repo.System.InstallArgs = l.GetField(st, "install_args").String();
+		// repo.System.UninstallArgs = l.GetField(st, "uninstall_args").String();
 
 		repos[repo.Name] = repo;
 	})

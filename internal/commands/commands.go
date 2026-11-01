@@ -47,15 +47,20 @@ func Remove(onlyArgs, excludeArgs string) error {
 			if err := os.Chdir(filepath.Join(dir, p.Name)); err != nil {
 				return err;
 			}
-
 			fmt.Printf("[REMOVE]: `%v`\n", p.Name);
+
+			sys, err := pkgs.GetBuildSystem(p);
+			if err != nil {
+				return err;
+			}
+			p.System = sys;
+
 			err = p.System.Uninstall();
 			if err != nil {
 				return err;
 			}
 			continue;
 		}
-		// TODO: use "detectSystem" as another callback
 		fmt.Printf("[REMOVE]: failed to remove `%v`, no known way of uninstalling\n", ent.Name());
 	}
 	return nil;

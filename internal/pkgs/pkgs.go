@@ -1,6 +1,7 @@
 package pkgs
 
 import (
+	"errors"
 	"fmt"
 	"iko/internal/config"
 	"iko/internal/git"
@@ -157,13 +158,59 @@ func BuildInstall(pkg Pkg) error {
 	if err := os.Chdir(filepath.Join(dir, pkg.Name)); err != nil {
 		return err;
 	}
-	fmt.Printf("[BUILD]: %v from %v\n", pkg.Name, pkg.Url);
+
+	sys, err := GetBuildSystem(pkg);
+	if err != nil {
+		return err;
+	}
+	pkg.System = sys;
+
 	err = pkg.System.Build();
 	if err != nil {
 		return err;
 	}
+	fmt.Printf("[BUILD]: %v from %v\n", pkg.Name, pkg.Url);
 	fmt.Printf("[INSTALL]: %v\n", pkg.Name);
 	err = pkg.System.Install();
 	return err;
+}
+
+func GetBuildSystem(pkg Pkg) (config.System, error) {
+	if pkg.System.Build != nil {
+		return pkg.System, nil;
+	}
+	return DetectBuildSystem(pkg.Path);
+}
+
+func DetectBuildSystem(path string) (config.System, error) {
+	var sys config.System;
+	l, err := config.GetState();
+	if err != nil {
+		return sys, err;
+	}
+
+	systems, err := config.ReadSystems(l);
+	if err != nil {
+		return sys, err;
+	}
+	buildMarkers, err := config.CollectBuildSystemMarkers(l, systems);
+	if err != nil {
+		return sys, err;
+	}
+	entries, err := os.ReadDir(path);
+	if err != nil {
+		return sys, err;
+	}
+	for _,e := range entries {
+		if n, ok := buildMarkers[e.Name()]; ok {
+			sys, ok := systems[n];
+			if !ok {
+				return sys, errors.New("unreachable: pkgs.DetechBuildSystem");
+			}
+
+			return sys, nil;
+		}
+	}
+	return sys, errors.New("could not find build system");
 }
 
