@@ -2,6 +2,7 @@ package flags
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -9,37 +10,34 @@ import (
 type Flag struct {
 	Long string
 	Short string
-	// Desc string
+	Usage string
 	Value any
 }
 
-type Flags map[string]Flag;
+type Flags map[string]*Flag;
 
-func (flags Flags) Var(long, short string, variable any) {
-	flag := Flag{long, short, variable};
-	flags[long] = flag;
-	if short != "" {
-		flags[short] = flag;
-	}
+func (flags Flags) Var(long, short string, variable any, msg string) {
+	flag := Flag{long, short, msg, variable};
+	flags[long] = &flag;
+	flags[short] = &flag;
 }
 
-// func (flags Flags) VarDesc(long, short string, variable any, desc string) {
-// 	flag := Flag{long, short, desc, variable};
-// 	flags[long] = flag;
-// 	if short != "" {
-// 		flags[short] = flag;
-// 	}
-// }
-//
-// func (flags Flags) ShowHelp() {
-// 	// TODO: should have a way of showing the flags arguments.
-// 	fmt.Printf("[HELP]:\n");
-// 	// fmt.Println(flags);
-// 	for _,i := range flags {
-// 		// fmt.Printf("  --%v, -%v\n\t%v\n", i.Long, i.Short, i.Desc);
-// 		fmt.Println(i);
-// 	}
-// }
+func (flags Flags) VarBool(long, short, msg string) *bool {
+	s := false;
+	flags.Var(long, short, &s, msg);
+	return &s;
+}
+
+func (flags Flags) Usage() {
+	fmt.Printf("Usage: %v\n", os.Args[0]);
+	showed := make(map[*Flag]string);
+	for _,f := range flags {
+		_, ok := showed[f];
+		if ok { continue; }
+		fmt.Printf("  --%v , -%v\n  \t%v\n", f.Long, f.Short, f.Usage);
+		showed[f] = f.Long;
+	}
+}
 
 func (flags Flags) Parse(argv []string) error {
 	for i := 0; i < len(argv); i++ {
@@ -50,8 +48,8 @@ func (flags Flags) Parse(argv []string) error {
 		switch {
 		case strings.HasPrefix(arg, "--"):
 			s := arg[2:];
-			flag, ok := flags[s];
-			if !ok {
+			flag := flags[s];
+			if flag == nil {
 				return fmt.Errorf("unknown flag: %v", arg);
 			}
 
@@ -63,8 +61,8 @@ func (flags Flags) Parse(argv []string) error {
 			shorts := arg[1:];
 			loop: for j := range shorts {
 				s := string(shorts[j]);
-				flag, ok := flags[s];
-				if !ok {
+				flag := flags[s];
+				if flag == nil {
 					return fmt.Errorf("unknown flag: %v", arg);
 				}
 
@@ -77,16 +75,19 @@ func (flags Flags) Parse(argv []string) error {
 				}
 			}
 		}
+
 	}
+
 	return nil;
 }
 
-func setFlag(flag Flag, s string, i* int, argv []string) error {
+func setFlag(flag *Flag, s string, i* int, argv []string) error {
 	switch v := flag.Value.(type) {
 	case *string:
 		if *i+1 >= len(argv) {
 			return fmt.Errorf("flag %v needs an argument", s);
 		}
+
 		*i++
 		*v = argv[*i];
 	case *int:

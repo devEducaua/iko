@@ -18,62 +18,57 @@ func main() {
 func parseArgs(argv []string) error {
 	f := make(flags.Flags);
 	var (
-		helpF bool;
-		installF bool;
-		removeF bool;
-		syncF bool;
-		updateF bool;
-		listF bool;
 		onlyF string;
 		excludeF string;
-	)
-	f.Var("install", "i", &installF);
-	f.Var("remove", "r", &removeF);
-	f.Var("update", "u", &updateF);
-	f.Var("sync", "s", &syncF);
-	f.Var("list", "l", &listF);
-	f.Var("only", "o", &onlyF);
-	f.Var("exclude", "x", &excludeF);
-	f.Var("help", "h", &helpF);
+	);
+	
+	installF := f.VarBool("install", "i", "install listed pkgs");
+	removeF := f.VarBool("remove", "r", "remove not declared pkgs");
+	updateF := f.VarBool("update", "u", "update pkgs");
+	syncF := f.VarBool("sync", "s", "remove, install and update pkgs");
+	listF := f.VarBool("list", "l", "list installed pkgs");
+	helpF := f.VarBool("help", "h", "show this page");
+	f.Var("only", "o", &onlyF, "only apply action on those pkgs");
+	f.Var("exclude", "x", &excludeF, "exclude pkgs from action");
 
 	if err := f.Parse(argv); err != nil {
 		return err;
 	}
 	if len(argv) < 1 {
-		// TODO: f.ShowHelp();
+		f.Usage();
 		return nil;
 	}
 
 	switch {
-	case installF:
+	case *installF:
 		err := commands.Install(onlyF, excludeF);
 		if err != nil {
 			return err;
 		}
-	case removeF:
+	case *removeF:
 		err := commands.Remove(onlyF, excludeF);
 		if err != nil {
 			return err;
 		}
-	case updateF:
+	case *updateF:
 		err := commands.Update(onlyF, excludeF);
 		if err != nil {
 			return err;
 		}
-	case syncF:
+	case *syncF:
 		err := commands.Sync(onlyF, excludeF);
 		if err != nil {
 			return err;
 		}
-	case listF:
+	case *listF:
 		err := commands.List();
 		if err != nil {
 			return err;
 		}
-	case helpF:
-		// TODO: f.ShowHelp()
+	case *helpF:
+		f.Usage();
 	default:
-		// TODO: f.ShowHelp()
+		f.Usage();
 	}
 	return nil;
 }
