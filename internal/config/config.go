@@ -53,10 +53,7 @@ func GetState() (*lua.LState, error) {
 
 func CollectBuildSystemMarkers(l *lua.LState, systems map[string]System) (map[string]string, error) {
 	m := make(map[string]string);
-	systems, err := ReadSystems(l);
-	if err != nil {
-		return nil, err;
-	}
+
 	for _,s := range systems {
 		for _,marker := range s.RootMarkers {
 			m[marker] = s.Name;
@@ -93,11 +90,6 @@ func ReadRepositories(l *lua.LState) (map[string]Repository, error) {
 		if ok {
 			repo.System.Name = l.GetField(st, "name").String();
 		}
-		// TODO: transform into []string instead of string
-		// repo.System.BuildArgs = l.GetField(st, "build_args").String();
-		// repo.System.InstallArgs = l.GetField(st, "install_args").String();
-		// repo.System.UninstallArgs = l.GetField(st, "uninstall_args").String();
-
 		repos[repo.Name] = repo;
 	})
 
@@ -128,19 +120,19 @@ func ReadSystems(l *lua.LState) (map[string]System, error) {
 		}
 		bcmd, err := GetFunctionFromTable(l, vt, "build_cmd");
 		if err != nil {
-			fmt.Printf("[ERR]: %v", err)
+			fmt.Printf("[ERROR]: %v", err)
 			return
 		}
 
 		icmd, err := GetFunctionFromTable(l, vt, "install_cmd");
 		if err != nil {
-			fmt.Printf("[ERR]: %v", err)
+			fmt.Printf("[ERROR]: %v", err)
 			return
 		}
 
 		ucmd, err := GetFunctionFromTable(l, vt, "uninstall_cmd");
 		if err != nil {
-			fmt.Printf("[ERR]: %v", err)
+			fmt.Printf("[ERROR]: %v", err)
 			return
 		}
 
@@ -206,6 +198,9 @@ func ReadPackages(l *lua.LState) ([]Package, error) {
 		vt.ForEach(func(k, v lua.LValue) {
 			pkg.Base = l.GetField(vt, "base").String();
 			pkg.Path = l.GetField(vt, "path").String();
+			if pkg.Base != "" && pkg.Path == "nil" {
+				pkg.Path = pkg.Name;	
+			}
 		})
 		pkgs = append(pkgs, pkg);
 	})
